@@ -1,0 +1,618 @@
+{% extends "base.html" %}
+
+{% block header_title %}Dashboard{% endblock %}
+
+{% block header_actions %}
+<a href="/dashboard" class="flex items-center gap-1.5 text-xs font-bold text-slate-600 bg-white border border-slate-200 rounded-lg px-3 py-1.5 hover:bg-slate-50 transition-colors shadow-sm">
+    <i class="fas fa-chart-bar text-blue-400"></i> View Reports
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="p-6 bg-slate-50 min-h-screen">
+
+    <!-- Quick Actions -->
+    <div class="mb-6 grid grid-cols-3 gap-4">
+        <a href="/leads" class="flex items-center justify-center gap-2 p-4 bg-white border border-slate-200 rounded-xl text-blue-700 font-semibold hover:bg-blue-50 hover:border-blue-200 transition-all shadow-sm">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            Add Lead
+        </a>
+        <a href="/activities" class="flex items-center justify-center gap-2 p-4 bg-white border border-slate-200 rounded-xl text-emerald-700 font-semibold hover:bg-emerald-50 hover:border-emerald-200 transition-all shadow-sm">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+            Log Activity
+        </a>
+        <button onclick="document.getElementById('meeting-form').scrollIntoView({behavior:'smooth'})" class="flex items-center justify-center gap-2 p-4 bg-white border border-slate-200 rounded-xl text-purple-700 font-semibold hover:bg-purple-50 hover:border-purple-200 transition-all shadow-sm">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
+            AI Meeting
+        </button>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Leads</p>
+                <div class="w-7 h-7 bg-blue-50 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-users text-blue-500 text-xs"></i>
+                </div>
+            </div>
+            <p class="text-3xl font-bold text-slate-800">{{ data.total_leads }}</p>
+            <p class="text-[11px] text-slate-400 mt-1">All time</p>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Active Deals</p>
+                <div class="w-7 h-7 bg-green-50 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-handshake text-green-500 text-xs"></i>
+                </div>
+            </div>
+            <p class="text-3xl font-bold text-slate-800">{{ data.active_deals }}</p>
+            <p class="text-[11px] text-slate-400 mt-1">In pipeline</p>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Won Deals</p>
+                <div class="w-7 h-7 bg-emerald-50 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-trophy text-emerald-500 text-xs"></i>
+                </div>
+            </div>
+            <p class="text-3xl font-bold text-emerald-600">{{ data.won_deals }}</p>
+            <p class="text-[11px] text-slate-400 mt-1">Closed won</p>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pending Tasks</p>
+                <div class="w-7 h-7 bg-amber-50 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-tasks text-amber-500 text-xs"></i>
+                </div>
+            </div>
+            <p class="text-3xl font-bold text-slate-800">{{ data.tasks_count }}</p>
+            <p class="text-[11px] text-slate-400 mt-1">Activities</p>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Meetings</p>
+                <div class="w-7 h-7 bg-purple-50 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-video text-purple-500 text-xs"></i>
+                </div>
+            </div>
+            <p class="text-3xl font-bold text-slate-800">{{ data.meetings_count }}</p>
+            <p class="text-[11px] text-slate-400 mt-1">AI-processed</p>
+        </div>
+    </div>
+
+    <!-- Recent Activity + Meetings -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <!-- Recent Activities -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+            <h3 class="text-sm font-bold text-slate-700 uppercase tracking-widest mb-5 flex items-center">
+                <i class="fas fa-clock mr-2 text-blue-400"></i>Recent Activities
+            </h3>
+            <div class="space-y-4">
+                {% for activity in data.recent_activities %}
+                <div class="flex items-start gap-3">
+                    <div class="bg-slate-100 p-2 rounded-lg flex-shrink-0 text-base leading-none">
+                        {% if activity.activity_type == 'Call' %}📞{% elif activity.activity_type == 'Email' %}📧{% else %}✅{% endif %}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-slate-800 truncate">{{ activity.description }}</p>
+                        <p class="text-xs text-slate-400 mt-0.5">{{ activity.created_at.strftime('%m/%d %H:%M') if activity.created_at else '' }}</p>
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-slate-400 text-sm italic text-center py-6">No recent activities.</p>
+                {% endfor %}
+            </div>
+            <a href="/activities" class="block text-center mt-5 text-xs font-bold text-blue-600 hover:text-blue-700 uppercase tracking-widest">View All Activities →</a>
+        </div>
+
+        <!-- Recent Meetings -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+            <h3 class="text-sm font-bold text-slate-700 uppercase tracking-widest mb-5 flex items-center">
+                <i class="fas fa-robot mr-2 text-purple-400"></i>Recent Meetings
+            </h3>
+            <div class="space-y-4">
+                {% for meeting in data.recent_meetings %}
+                <div class="border-l-4 border-purple-200 pl-4 py-1 rounded-r-lg">
+                    <p class="text-sm font-bold text-slate-800">{{ meeting.title }}</p>
+                    <p class="text-xs text-slate-500 truncate mb-1 italic">"{{ (meeting.transcript or '')[:80] }}..."</p>
+                    <p class="text-xs text-slate-400">{{ meeting.created_at.strftime('%m/%d %H:%M') if meeting.created_at else '' }}</p>
+                </div>
+                {% else %}
+                <p class="text-slate-400 text-sm italic text-center py-6">No recent meetings.</p>
+                {% endfor %}
+            </div>
+            <a href="/activities" class="block text-center mt-5 text-xs font-bold text-purple-600 hover:text-purple-700 uppercase tracking-widest">View Activity Feed →</a>
+        </div>
+    </div>
+
+    <!-- System Status -->
+    <div class="mb-6 bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-bold text-slate-700 uppercase tracking-widest flex items-center">
+                <span class="w-2 h-2 bg-green-500 rounded-full mr-2.5 animate-pulse"></span>
+                System Status
+            </h3>
+            <span class="text-xs font-bold text-green-600 bg-green-50 border border-green-100 px-3 py-1 rounded-full uppercase tracking-widest">
+                Go-Live Ready
+            </span>
+        </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="flex items-center space-x-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
+            <span class="text-green-500 text-lg">✔</span>
+            <div>
+                <p class="text-xs font-bold text-slate-700">Leads Module</p>
+                <p class="text-[10px] text-slate-400">Active</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
+            <span class="text-green-500 text-lg">✔</span>
+            <div>
+                <p class="text-xs font-bold text-slate-700">Deals Module</p>
+                <p class="text-[10px] text-slate-400">Active</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
+            <span class="text-green-500 text-lg">✔</span>
+            <div>
+                <p class="text-xs font-bold text-slate-700">Activities</p>
+                <p class="text-[10px] text-slate-400">Active</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
+            <span class="text-green-500 text-lg">✔</span>
+            <div>
+                <p class="text-xs font-bold text-slate-700">Reports</p>
+                <p class="text-[10px] text-slate-400">Active</p>
+            </div>
+        </div>
+    </div>
+    <div class="mt-4 flex items-center space-x-6 text-[10px] text-slate-400">
+        <span><i class="fas fa-database mr-1"></i> Database: Connected</span>
+        <span><i class="fas fa-lock mr-1"></i> Auth: Active</span>
+        <span><i class="fas fa-robot mr-1"></i> AI Assistant: Online</span>
+        <span><i class="fas fa-satellite-dish mr-1"></i> Lead Capture API: Online</span>
+    </div>
+</div>
+
+    <!-- Meeting Intelligence System -->
+    <div id="meeting-form" class="mt-6 bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+        <div class="flex items-center gap-3 mb-5">
+            <div class="w-9 h-9 bg-indigo-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-robot text-indigo-500"></i>
+            </div>
+            <div>
+                <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                    Meeting Intelligence
+                    <span class="text-[10px] bg-indigo-100 text-indigo-700 py-0.5 px-2 rounded-full font-bold uppercase tracking-widest">Beta</span>
+                </h3>
+                <p class="text-xs text-slate-500 mt-0.5">AI extracts tasks, deadlines, and key points from meeting notes</p>
+            </div>
+        </div>
+        <form action="/meetings/process" method="POST" class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Meeting Title</label>
+                <input type="text" name="title" required
+                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                    placeholder="e.g. Q3 Pipeline Review">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Meeting Transcript</label>
+                <textarea name="transcript" required rows="4"
+                    placeholder="Paste meeting notes here... e.g. 'We will follow up by tomorrow. John should send the contract next week...'"
+                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all resize-none"></textarea>
+                <p class="text-[11px] text-slate-400 mt-1.5">AI will auto-generate Activity Tasks from this transcript.</p>
+            </div>
+            <button type="submit"
+                class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm px-6 py-2.5 rounded-xl shadow-lg shadow-indigo-500/20 transition-all">
+                <i class="fas fa-magic"></i> Generate Insights
+            </button>
+        </form>
+    </div>
+
+    <!-- Output Section -->
+    {% if processed_meeting %}
+    <div class="mt-6 bg-indigo-50 border-l-4 border-indigo-500 rounded-xl p-6 border border-indigo-100 mb-6">
+    <h3 class="text-2xl font-bold text-indigo-900 mb-2">Insights Extracted: {{ processed_meeting.title }}</h3>
+    {% for insight in processed_meeting.insights %}{% if insight.type == "summary" %}
+    <div class="mb-4 p-4 bg-white/60 backdrop-blur-sm rounded-xl border border-indigo-200">
+        <p class="text-xs font-bold text-indigo-800 uppercase tracking-widest mb-1 flex items-center gap-1.5">
+            <i class="fas fa-magic text-indigo-500"></i> AI Executive Summary
+        </p>
+        <p class="text-sm text-slate-700 leading-relaxed italic">"{{ insight.content }}"</p>
+    </div>
+    {% endif %}{% endfor %}
+    <p class="text-sm text-indigo-700 mb-6 font-medium bg-white inline-block px-3 py-1 rounded shadow-sm">Tasks have been automatically saved to the Activity Module.</p>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Action Items (Tasks) -->
+        <div>
+            <h4 class="font-bold text-gray-800 mb-3 flex items-center border-b pb-2">
+                <span class="bg-red-100 text-red-800 text-xs font-bold px-2.5 py-1 rounded-full mr-2 uppercase tracking-wide">Tasks</span>
+                Action Items
+            </h4>
+            <ul class="list-none space-y-3">
+                {% for insight in processed_meeting.insights %}
+                    {% if insight.type == "task" %}
+                    <li class="bg-white p-3 rounded shadow-sm border border-gray-100 flex flex-col">
+                        <span class="text-gray-800 font-medium">{{ insight.content }}</span>
+                        <div class="mt-2 flex items-center space-x-2">
+                            {% if insight.owner %}<span class="font-bold text-xs text-indigo-600 bg-indigo-50 px-2 py-1 rounded">@{{ insight.owner }}</span>{% endif %}
+                            {% if insight.deadline %}<span class="text-xs text-red-600 bg-red-50 px-2 py-1 rounded border border-red-100 flex items-center">
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                Due: {{ insight.deadline }}
+                            </span>{% endif %}
+                        </div>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+        
+        <!-- Key Points -->
+        <div>
+            <h4 class="font-bold text-gray-800 mb-3 flex items-center border-b pb-2">
+                <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-1 rounded-full mr-2 uppercase tracking-wide">Points</span>
+                Key Discussion
+            </h4>
+            <ul class="list-disc pl-5 space-y-2">
+                {% for insight in processed_meeting.insights %}
+                    {% if insight.type == "point" %}
+                    <li class="text-gray-700 leading-relaxed">{{ insight.content }}</li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+        </div>
+    </div>
+    {% endif %}
+
+</div><!-- /page wrapper -->
+
+<!-- CRM Assistant Chatbot Floating UI -->
+<style>
+  /* ── Typing indicator dots ─────────────────────────────────────────────── */
+  @keyframes chatBounce {
+    0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
+    40%           { transform: translateY(-5px); opacity: 1; }
+  }
+  .chat-typing-dot {
+    width: 6px; height: 6px;
+    background: #6366f1;
+    border-radius: 50%;
+    display: inline-block;
+    animation: chatBounce 1.2s infinite ease-in-out;
+  }
+  .chat-typing-dot:nth-child(2) { animation-delay: 0.15s; }
+  .chat-typing-dot:nth-child(3) { animation-delay: 0.30s; }
+
+  /* ── Chat window open/close transition ─────────────────────────────────── */
+  #chat-window {
+    transform-origin: bottom right;
+    transition: opacity 0.22s ease, transform 0.22s ease;
+  }
+  #chat-window.chat-hidden {
+    opacity: 0;
+    transform: scale(0.93) translateY(10px);
+    pointer-events: none;
+  }
+
+  /* ── Thin custom scrollbar ──────────────────────────────────────────────── */
+  #chat-history::-webkit-scrollbar       { width: 4px; }
+  #chat-history::-webkit-scrollbar-track { background: transparent; }
+  #chat-history::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
+</style>
+
+<div class="fixed bottom-24 right-6 z-50">
+
+  <!-- Toggle button -->
+  <button id="chat-toggle"
+    class="bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white rounded-full w-14 h-14 shadow-lg transition-all duration-200 flex items-center justify-center"
+    aria-label="Open CRM Assistant">
+    <svg id="chat-icon-open" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+    </svg>
+    <svg id="chat-icon-close" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+    </svg>
+  </button>
+
+  <!-- Chat window -->
+  <div id="chat-window"
+    class="chat-hidden absolute bottom-20 right-0 w-96 bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden"
+    style="max-height:520px;">
+
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-indigo-600 to-indigo-700 px-5 py-3.5 flex items-center justify-between flex-shrink-0">
+      <div class="flex items-center space-x-3">
+        <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714a2.25 2.25 0 001.357 2.059l.907.379c1.036.435 1.736 1.47 1.736 2.59V21M9.75 3.104A24.301 24.301 0 005.25 3.186"/>
+          </svg>
+        </div>
+        <div>
+          <p class="text-white font-semibold text-sm leading-tight">CRM Assistant</p>
+          <div class="flex items-center space-x-1">
+            <span class="w-1.5 h-1.5 bg-green-400 rounded-full"></span>
+            <p class="text-indigo-200 text-[10px]">Online</p>
+          </div>
+        </div>
+      </div>
+      <button id="chat-close"
+        class="text-indigo-200 hover:text-white transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10"
+        aria-label="Close chat">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Message history -->
+    <div id="chat-history"
+      class="flex-1 px-4 py-4 overflow-y-auto bg-slate-50 space-y-4 text-sm"
+      style="min-height:220px; max-height:300px;">
+      <!-- Welcome bubble (bot) -->
+      <div class="flex items-end space-x-2">
+        <div class="w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0 mb-5">
+          <svg class="w-3 h-3 text-indigo-600" fill="currentColor" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"/>
+          </svg>
+        </div>
+        <div>
+          <div class="bg-white border border-gray-200 text-gray-800 px-4 py-2.5 rounded-2xl rounded-bl-sm shadow-sm leading-relaxed"
+            style="max-width:260px;">
+            Hi! I'm your CRM assistant. Ask me about leads, deals, activities, or meetings.
+          </div>
+          <p class="text-[10px] text-slate-400 mt-1 ml-1" id="chat-welcome-time"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick action chips -->
+    <div class="px-4 pt-3 pb-2 bg-white border-t border-gray-100 flex flex-wrap gap-2 flex-shrink-0">
+      <button class="chat-quick-btn text-[11px] font-semibold px-3 py-1.5 rounded-full border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-colors"
+        data-msg="Create a new lead">+ Create Lead</button>
+      <button class="chat-quick-btn text-[11px] font-semibold px-3 py-1.5 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors"
+        data-msg="Show me all active deals">Show Deals</button>
+      <button class="chat-quick-btn text-[11px] font-semibold px-3 py-1.5 rounded-full border border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100 transition-colors"
+        data-msg="Add a reminder for follow up">+ Add Reminder</button>
+    </div>
+
+    <!-- Input row -->
+    <div class="px-4 py-3 bg-white border-t border-gray-100 flex-shrink-0">
+      <div class="flex items-center space-x-2 bg-slate-100 rounded-full px-4 py-2">
+        <input id="chat-input" type="text"
+          placeholder="Ask me anything..."
+          class="flex-1 bg-transparent text-sm text-gray-800 placeholder-slate-400 focus:outline-none"
+          autocomplete="off">
+        <button id="chat-send"
+          class="w-7 h-7 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full flex items-center justify-center transition-colors flex-shrink-0"
+          aria-label="Send">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /chat-window -->
+</div><!-- /fixed wrapper -->
+
+<script>
+(function () {
+  'use strict';
+  try {
+
+    // ── Element refs ──────────────────────────────────────────────────────
+    var toggle    = document.getElementById('chat-toggle');
+    var win       = document.getElementById('chat-window');
+    var closeBtn  = document.getElementById('chat-close');
+    var input     = document.getElementById('chat-input');
+    var sendBtn   = document.getElementById('chat-send');
+    var history_  = document.getElementById('chat-history');
+    var iconOpen  = document.getElementById('chat-icon-open');
+    var iconClose = document.getElementById('chat-icon-close');
+
+    var isOpen = false;
+
+    // ── Timestamp ──────────────────────────────────────────────────────────
+    function nowTime() {
+      return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+    var wt = document.getElementById('chat-welcome-time');
+    if (wt) wt.textContent = nowTime();
+
+    // ── Scroll ─────────────────────────────────────────────────────────────
+    function scrollBottom() {
+      try { history_.scrollTo({ top: history_.scrollHeight, behavior: 'smooth' }); } catch (_) {
+        history_.scrollTop = history_.scrollHeight;
+      }
+    }
+
+    // ── Open / close ───────────────────────────────────────────────────────
+    function openChat() {
+      isOpen = true;
+      win.classList.remove('chat-hidden');
+      iconOpen.classList.add('hidden');
+      iconClose.classList.remove('hidden');
+      scrollBottom();
+      setTimeout(function () { input.focus(); }, 180);
+    }
+    function closeChat() {
+      isOpen = false;
+      win.classList.add('chat-hidden');
+      iconOpen.classList.remove('hidden');
+      iconClose.classList.add('hidden');
+    }
+    toggle.addEventListener('click', function () { isOpen ? closeChat() : openChat(); });
+    closeBtn.addEventListener('click', closeChat);
+
+    // ── Append user message (right-aligned) ───────────────────────────────
+    function appendUser(text) {
+      var wrap = document.createElement('div');
+      wrap.className = 'flex flex-col items-end';
+
+      var bubble = document.createElement('div');
+      bubble.className = 'bg-indigo-600 text-white px-4 py-2.5 rounded-2xl rounded-br-sm shadow-sm text-sm leading-relaxed';
+      bubble.style.maxWidth = '260px';
+      bubble.textContent = text;
+
+      var meta = document.createElement('div');
+      meta.className = 'flex items-center space-x-1 mt-1 mr-0.5';
+
+      var time = document.createElement('span');
+      time.className = 'text-[10px] text-slate-400';
+      time.textContent = nowTime();
+
+      var sep = document.createTextNode(' · ');
+
+      var status = document.createElement('span');
+      status.className = 'text-[10px] text-slate-400';
+      status.textContent = 'Sent';
+
+      meta.appendChild(time);
+      meta.appendChild(sep);
+      meta.appendChild(status);
+      wrap.appendChild(bubble);
+      wrap.appendChild(meta);
+      history_.appendChild(wrap);
+      scrollBottom();
+
+      // Upgrade to "Delivered" after 800 ms — UI only, no backend call
+      setTimeout(function () { status.textContent = 'Delivered'; }, 800);
+    }
+
+    // ── Typing indicator ──────────────────────────────────────────────────
+    function showTyping() {
+      var wrap = document.createElement('div');
+      wrap.id = 'chat-typing';
+      wrap.className = 'flex items-end space-x-2';
+
+      var av = document.createElement('div');
+      av.className = 'w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0 mb-1';
+      av.innerHTML = '<svg class="w-3 h-3 text-indigo-600" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>';
+
+      var bub = document.createElement('div');
+      bub.className = 'bg-white border border-gray-200 px-4 py-3 rounded-2xl rounded-bl-sm shadow-sm flex items-center space-x-1';
+      bub.innerHTML =
+        '<span class="chat-typing-dot"></span>' +
+        '<span class="chat-typing-dot"></span>' +
+        '<span class="chat-typing-dot"></span>';
+
+      wrap.appendChild(av);
+      wrap.appendChild(bub);
+      history_.appendChild(wrap);
+      scrollBottom();
+    }
+    function removeTyping() {
+      var el = document.getElementById('chat-typing');
+      if (el && el.parentNode) el.parentNode.removeChild(el);
+    }
+
+    // ── Append bot message (left-aligned) ─────────────────────────────────
+    function appendBot(text) {
+      var wrap = document.createElement('div');
+      wrap.className = 'flex items-end space-x-2';
+
+      var av = document.createElement('div');
+      av.className = 'w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0 mb-5';
+      av.innerHTML = '<svg class="w-3 h-3 text-indigo-600" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>';
+
+      var col = document.createElement('div');
+
+      var bub = document.createElement('div');
+      bub.className = 'bg-white border border-gray-200 text-gray-800 px-4 py-2.5 rounded-2xl rounded-bl-sm shadow-sm text-sm leading-relaxed whitespace-pre-wrap';
+      bub.style.maxWidth = '260px';
+      bub.textContent = text;
+
+      var time = document.createElement('p');
+      time.className = 'text-[10px] text-slate-400 mt-1 ml-1';
+      time.textContent = nowTime();
+
+      col.appendChild(bub);
+      col.appendChild(time);
+      wrap.appendChild(av);
+      wrap.appendChild(col);
+      history_.appendChild(wrap);
+      scrollBottom();
+    }
+
+    // ── Send ──────────────────────────────────────────────────────────────
+    function send() {
+      try {
+        var query = input.value.trim();
+        if (!query) return;
+        input.value = '';
+        sendBtn.disabled = true;
+        appendUser(query);
+        showTyping();
+
+        fetch('/chatbot/query', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          redirect: 'manual',   // don't silently follow auth redirects
+          body: JSON.stringify({ query: query })
+        })
+        .then(function (res) {
+          removeTyping();
+          // Opaque redirect = 401 → 307 to /login (session expired)
+          if (res.type === 'opaqueredirect' || res.status === 0) {
+            appendBot('Your session has expired. Please refresh the page and log in again.');
+            return null;
+          }
+          if (res.status === 401 || res.status === 403) {
+            appendBot('Session expired. Please refresh and log in again.');
+            return null;
+          }
+          if (!res.ok) {
+            throw new Error('Server error (HTTP ' + res.status + ')');
+          }
+          // Guard against non-JSON (e.g. HTML error page)
+          var ct = res.headers.get('content-type') || '';
+          if (!ct.includes('application/json')) {
+            throw new Error('Unexpected response type: ' + ct);
+          }
+          return res.json();
+        })
+        .then(function (data) {
+          if (!data) return;  // already handled above
+          appendBot(data.response || 'No response received.');
+        })
+        .catch(function (err) {
+          removeTyping();
+          appendBot('Could not reach the assistant. Check your connection and try again.');
+          console.warn('[CRM Chat]', err);
+        })
+        .finally(function () {
+          sendBtn.disabled = false;
+          input.focus();
+        });
+      } catch (e) {
+        console.warn('[CRM Chat] send error:', e);
+      }
+    }
+
+    sendBtn.addEventListener('click', send);
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+    });
+
+    // ── Quick action chips → fill input only ──────────────────────────────
+    document.querySelectorAll('.chat-quick-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var msg = btn.getAttribute('data-msg');
+        if (msg) { input.value = msg; input.focus(); }
+      });
+    });
+
+  } catch (fatalErr) {
+    // Graceful degradation — page remains usable, chat silently disabled
+    console.warn('[CRM Chat] init failed (non-critical):', fatalErr);
+  }
+}());
+</script>
+</div>
+{% endblock %}

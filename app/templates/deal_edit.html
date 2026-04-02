@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block header_title %}Edit Deal{% endblock %}
+
+{% block header_actions %}
+<a href="/deals/{{ deal.id }}" class="px-3 py-1.5 bg-white border border-slate-200 text-slate-600 text-xs font-bold rounded-lg hover:bg-slate-50 transition-all">← Cancel</a>
+<button form="deal-edit-form" type="submit" class="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-1.5 rounded-lg shadow-md shadow-blue-500/20 transition-all">
+    <i class="fas fa-save"></i> Apply Changes
+</button>
+{% endblock %}
+
+{% block content %}
+<div class="p-6 bg-slate-50 min-h-screen">
+
+    <!-- Form Card -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 max-w-2xl">
+        <h2 class="text-xl font-bold text-slate-800 mb-6">Edit Deal</h2>
+
+        <form id="deal-edit-form" action="/deals/{{ deal.id }}" method="POST" class="space-y-5">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Deal Name</label>
+                    <input type="text" name="name" value="{{ deal.name }}" required
+                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Amount ($)</label>
+                    <input type="number" step="0.01" name="amount" value="{{ deal.amount }}" required
+                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Stage</label>
+                    <select name="stage"
+                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
+                        {% for stage in stages %}
+                        <option value="{{ stage }}" {% if deal.stage==stage %}selected{% endif %}>{{ stage }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Closing Date</label>
+                    <input type="date" name="closing_date"
+                        value="{{ deal.closing_date.strftime('%Y-%m-%d') if deal.closing_date else '' }}"
+                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Follow-up Date</label>
+                    <input type="date" name="follow_up_date"
+                        value="{{ deal.follow_up_date.strftime('%Y-%m-%d') if deal.follow_up_date else '' }}"
+                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Primary Contact</label>
+                    <select name="contact_id" required
+                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
+                        {% for contact in contacts %}
+                        <option value="{{ contact.id }}" {% if deal.contact_id==contact.id %}selected{% endif %}>
+                            {{ contact.first_name }} {{ contact.last_name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Description</label>
+                    <textarea name="description" rows="4"
+                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none">{{ deal.description or '' }}</textarea>
+                </div>
+            </div>
+
+        </form>
+    </div>
+
+</div><!-- /page wrapper -->
+{% endblock %}
